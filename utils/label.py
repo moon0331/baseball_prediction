@@ -2,11 +2,30 @@ import numpy as np
 import pandas as pd
 from collections import Counter
 
+BATTER_OUT_OUTCOME = '''
+            field_out strikeout grounded_into_double_play 
+            sac_bunt foul_tip force_out field_error sac_fly 
+            double_play fielders_choice fielders_choice_out
+            strikeout_double_play bunt_foul_tip sac_fly_double_play 
+            sac_bunt_double_play triple_play
+            '''.split()
+BATTER_HIT_OUTCOME = ['single', 'double', 'triple', 'home_run']
+BATTER_ADVANCE_OUTCOME = ['walk', 'hit_by_pitch', 'intent_walk', 'catcher_interf']
+BATTER_NOOP_OUTCOME = '''
+            foul ball called_strike swinging_strike blocked_ball foul_bunt 
+            swinging_strike_blocked missed_bunt wild_pitch passed_ball pitchout 
+            stolen_base_2b game_advisory foul_pitchout swinging_pitchout 
+            intent_ball ejection pickoff_error_2b stolen_base_3b stolen_base_home other_out
+            '''.split()
+
 def merge_label_inplace(df):
     df['y'] = np.where(df['events'].isna(), df['description'], df['events'])
 
+def classify_label_inplace(df):
+    pass 
+
 if __name__ == '__main__':
-    df = pd.read_csv('data_csv/2015-to-2021(named,alpha)_v2.csv')
+    df = pd.read_csv('data_csv/sorted-2015-to-2021(named,alpha)_v3.csv')
     df.drop(['Unnamed: 0'], axis=1, inplace=True)
     merge_label_inplace(df)
     breakpoint()
@@ -27,16 +46,16 @@ y의 종류
 'pickoff_caught_stealing_home', 'runner_double_play', 'swinging_pitchout', 'stolen_base_home', 
 'intent_walk', 'intent_ball', 'ejection', 'pickoff_error_2b', 'stolen_base_3b']
 
-주자 out : caught_stealing_2b caught_stealing_home pickoff_3b caught_stealing_3b pickoff_2b 
+주자 out (10) : caught_stealing_2b caught_stealing_home pickoff_3b caught_stealing_3b pickoff_2b 
             pickoff_1b pickoff_caught_stealing_2b pickoff_caught_stealing_3b pickoff_caught_stealing_home runner_double_play
-나머지 : foul ball called_strike swinging_strike blocked_ball foul_bunt swinging_strike_blocked missed_bunt wild_pitch passed_ball pitchout stolen_base_2b
+<< 2아웃에서만 기록되는거 같음
+
+나머지 (21) : foul ball called_strike swinging_strike blocked_ball foul_bunt swinging_strike_blocked missed_bunt wild_pitch passed_ball pitchout stolen_base_2b
         game_advisory foul_pitchout swinging_pitchout intent_ball ejection pickoff_error_2b stolen_base_3b stolen_base_home other_out
 
 
 타자 out (16) : field_out strikeout grounded_into_double_play sac_bunt foul_tip force_out field_error sac_fly double_play fielders_choice fielders_choice_out
             strikeout_double_play bunt_foul_tip sac_fly_double_play sac_bunt_double_play triple_play
-
-타자와 관계없는 out () : 
 
 타자 진루 (4) : walk hit_by_pitch intent_walk catcher_interf
 타자 안타 (4) : single double home_run triple
