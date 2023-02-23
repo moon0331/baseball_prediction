@@ -2,6 +2,19 @@ import numpy as np
 import pandas as pd
 from collections import Counter
 
+# 임시 import
+from feature import feature_selection
+
+# This outcome is derived from df.y
+# len(df.y.unique()) = 55
+# len(df.description.unique()) = 16
+# len(df.events.unique()) = 42
+BATTER_NOOP_OUTCOME = '''
+            foul ball called_strike swinging_strike blocked_ball foul_bunt 
+            swinging_strike_blocked missed_bunt wild_pitch passed_ball pitchout 
+            stolen_base_2b game_advisory foul_pitchout swinging_pitchout 
+            intent_ball ejection pickoff_error_2b stolen_base_3b stolen_base_home other_out
+            '''.split()
 BATTER_OUT_OUTCOME = '''
             field_out strikeout grounded_into_double_play 
             sac_bunt foul_tip force_out field_error sac_fly 
@@ -9,25 +22,59 @@ BATTER_OUT_OUTCOME = '''
             strikeout_double_play bunt_foul_tip sac_fly_double_play 
             sac_bunt_double_play triple_play
             '''.split()
-BATTER_HIT_OUTCOME = ['single', 'double', 'triple', 'home_run']
 BATTER_ADVANCE_OUTCOME = ['walk', 'hit_by_pitch', 'intent_walk', 'catcher_interf']
-BATTER_NOOP_OUTCOME = '''
-            foul ball called_strike swinging_strike blocked_ball foul_bunt 
-            swinging_strike_blocked missed_bunt wild_pitch passed_ball pitchout 
-            stolen_base_2b game_advisory foul_pitchout swinging_pitchout 
-            intent_ball ejection pickoff_error_2b stolen_base_3b stolen_base_home other_out
-            '''.split()
+BATTER_HIT_OUTCOME = ['single', 'double', 'triple', 'home_run']
+
+BATTER_NOOP_PLIST = {k: 'noop' for k in BATTER_NOOP_OUTCOME}
+BATTER_OUT_PLIST = {k: 'out' for k in BATTER_OUT_OUTCOME}
+BATTER_ADVANCE_PLIST = {k: 'advance' for k in BATTER_ADVANCE_OUTCOME}
+BATTER_HIT_PLIST = {k: 'hit' for k in BATTER_HIT_OUTCOME}
 
 def merge_label_inplace(df):
+    '''
+    events와 description을 합쳐서 y라는 새로운 column을 만든다.
+    '''
     df['y'] = np.where(df['events'].isna(), df['description'], df['events'])
 
-def classify_label_inplace(df):
-    pass 
+def classify_label_inplace(df, separate_hit=1):
+    '''
+    학습에 필요한 레이블로 변환한다.
+
+    separate_hit=1  -> {1루타, 2루타, 3루타, 홈런}  1 class
+    separate_hit=2  -> 1루타, {2루타, 3루타, 홈런}  2 class
+    separate_hit=3  -> 1루타, {2루타, 3루타}, 홈런  3 class
+    separate_hit=4  -> 1루타, 2루타, 3루타, 홈런    4 class
+    '''
+
+    assert separate_hit in range(1, 4+5)
+
+    plist = BATTER_HIT_PLIST
+
+    if separate_hit == 1:
+        plist = {k: 'hit' for k in plist}
+    elif separate_hit == 2:
+        plist['double'] = 'XBH'
+        plist['triple'] = 'XBH'
+        plist['home_run'] = 'XBH'
+    elif separate_hit == 3:
+        plist['double'] = 'XBH'
+        plist['triple'] = 'XBH'
+        plist['home_run'] = 'home_run'
+    elif separate_hit == 4:
+        plist = {k: k for k in plist}
+
+    mapping = BATTER_NOOP_PLIST | BATTER_OUT_PLIST | BATTER_ADVANCE_PLIST | plist
+
+    df['y_label'] = df['y'].map(mapping)
+
+    breakpoint()
+
 
 if __name__ == '__main__':
     df = pd.read_csv('data_csv/sorted-2015-to-2021(named,alpha)_v3.csv')
     df.drop(['Unnamed: 0'], axis=1, inplace=True)
     merge_label_inplace(df)
+    classify_label_inplace(df)
     breakpoint()
     # df.drop(['events', 'description'], axis=1, inplace=True)
     # df.to_csv('data_csv/2021-06(named,alpha)_v2.csv', index=False)
