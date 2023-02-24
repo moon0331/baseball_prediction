@@ -15,8 +15,8 @@ break_length_deprecated -
 zone    c
 des -
 game_type   -
-stand   c
-p_throws    c
+stand   b
+p_throws    b
 home_team   c
 away_team   c
 type    -
