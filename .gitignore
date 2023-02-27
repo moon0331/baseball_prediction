@@ -1,4 +1,1 @@
-data_csv/2015-to-2021.csv
-data_csv/2015-to-2021(named,alpha)_v2.csv
-data_csv/sorted-2015-to-2021(named,alpha)_v3.csv
-dummies.csv
+*.csv

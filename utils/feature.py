@@ -50,18 +50,22 @@ def get_dummies(df, info):
     new_df_x = pd.DataFrame()
     new_df_y = pd.DataFrame()
     for col in tqdm(df.columns):
-        if info[info.column_name==col].data_type.item() == 'c': # category
-            col_one_hot = pd.get_dummies(df[col], prefix=col)
-            new_df_x = pd.concat([new_df_x, col_one_hot], axis=1)
-        if info[info.column_name==col].data_type.item() == 'b': # binary
+        if info[info.column_name==col].data_type.item() in ('c', 'b'): # category, binary
             col_one_hot = pd.get_dummies(df[col], prefix=col)
             new_df_x = pd.concat([new_df_x, col_one_hot], axis=1)
         elif info[info.column_name==col].data_type.item() == 'n': # numeric
+            col_one_hot = None
             new_df_x = pd.concat([new_df_x, df[col]], axis=1)
         elif info[info.column_name==col].data_type.item() == 'cy': # category label
             col_one_hot = pd.get_dummies(df[col], prefix=col)
-            new_df_y = pd.concat([new_df_y, df[col]], axis=1)
+            new_df_y = pd.concat([new_df_y, col_one_hot], axis=1)
+        else:
+            col_one_hot = None
         # breakpoint()
+        if col_one_hot is not None:
+            print(col, len(col_one_hot.columns))
+        else:
+            print(col, 0)
 
     breakpoint()
 
@@ -69,7 +73,8 @@ def get_dummies(df, info):
 
 
 if __name__ == '__main__':
-    df = pd.read_csv('data_csv/sorted-2015-to-2021(named,alpha)_v3.csv')
+    # df = pd.read_csv('data_csv/sorted-2015-to-2021(named,alpha)_v3.csv')
+    df = pd.read_csv('data_csv/2015-to-2021_v3.csv')
     df.drop(['Unnamed: 0'], axis=1, inplace=True)
 
     erase_onbase_who(df)

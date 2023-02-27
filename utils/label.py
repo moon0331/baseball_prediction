@@ -3,7 +3,7 @@ import pandas as pd
 from collections import Counter
 
 # 임시 import
-from feature import feature_selection
+# from feature import feature_selection
 
 # This outcome is derived from df.y
 # len(df.y.unique()) = 55
@@ -68,14 +68,18 @@ def classify_label_inplace(df, separate_hit=1):
     df['y_label'] = df['y'].map(mapping)
 
     breakpoint()
+    df.to_csv('data_csv/2015-to-2021_v3.csv')
+    breakpoint()
+
 
 
 if __name__ == '__main__':
-    df = pd.read_csv('data_csv/sorted-2015-to-2021(named,alpha)_v3.csv')
+    # df = pd.read_csv('data_csv/sorted-2015-to-2021(named,alpha)_v3.csv')
+    df = pd.read_csv('data_csv/2015-to-2021.csv')
     df.drop(['Unnamed: 0'], axis=1, inplace=True)
     merge_label_inplace(df)
     classify_label_inplace(df)
-    breakpoint()
+    # breakpoint()
     # df.drop(['events', 'description'], axis=1, inplace=True)
     # df.to_csv('data_csv/2021-06(named,alpha)_v2.csv', index=False)
 
